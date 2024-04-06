@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  cta-tracker
+
+Globals:
+  Function:
+    Timeout: 20
+
+Resources:
+  CTATrackerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: cta_tracker/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: cta_tracker
+      Events:
+        ScheduledRun:
+          Type: Schedule # https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#schedule
+          Properties:
+            Schedule: "rate(1 minute)"
+            Description: "Runs every 1 minute to get CTA schedules"
+            Name: "CTA-TRACKER-SCHEDULE"
+
+Outputs:
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  CTATrackerFunction:
+    Description: "CTA Tracker Lambda"
+    Value: !GetAtt CTATrackerFunction.Arn
+  CTATrackerFunctionIamRole:
+    Description: "CTA Tracker IAM Role"
+    Value: !GetAtt CTATrackerFunctionRole.Arn

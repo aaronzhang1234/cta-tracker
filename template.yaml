@@ -19,6 +19,9 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: cta_tracker
+        - S3CrudPolicy:
+            BucketName: cta-jsons
+
       Environment:
         Variables:
           API_KEY:

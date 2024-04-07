@@ -8,8 +8,7 @@ class CTAHelper:
         key = os.getenv("API_KEY")
         url = f"http://lapi.transitchicago.com/api/1.0/ttpositions.aspx?key={key}&rt=red,blue,brn,g,org,p,pink,y&outputType=JSON"
         cta_response = requests.get(url)
-        response_json = cta_response.json()
-        return response_json["ctatt"]["route"]
+        return cta_response.json()
 
     def get_train_id(self, route_name, train_json):
         return "-".join([route_name,

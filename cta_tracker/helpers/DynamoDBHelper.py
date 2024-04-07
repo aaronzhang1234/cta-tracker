@@ -1,5 +1,6 @@
 import boto3
 
+
 class DynamoDBHelper:
     def __init__(self):
         dynamodb = boto3.resource('dynamodb')
@@ -25,4 +26,3 @@ class DynamoDBHelper:
         except Exception as e:
             printf(f"Failed to get item with primary key of {primary_key} with exception {e}")
             return None
-

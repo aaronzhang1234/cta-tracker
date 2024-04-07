@@ -12,6 +12,7 @@ class DynamoDBHelper:
             )
         except Exception as e:
             print(f"Failed to add Item to dynamo with partition key {train_item} with exception {e}")
+
     def get_item(self, primary_key):
         try:
             item = self.table.get_item(
@@ -23,6 +24,5 @@ class DynamoDBHelper:
                 return item["Item"]
         except Exception as e:
             printf(f"Failed to get item with primary key of {primary_key} with exception {e}")
-        finally:
             return None
 

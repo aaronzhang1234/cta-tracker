@@ -19,6 +19,9 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: cta_tracker
+      Environment:
+        Variables:
+          API_KEY:
       Events:
         ScheduledRun:
           Type: Schedule # https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#schedule

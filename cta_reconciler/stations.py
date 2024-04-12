@@ -1,5 +1,3 @@
-from enum import Enum
-
 station_dict= {
     "40830": "18th",
     "41120": "35th-Bronzeville-IIT",

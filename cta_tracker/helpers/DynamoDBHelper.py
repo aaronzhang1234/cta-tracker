@@ -1,5 +1,5 @@
 import boto3
-
+from boto3.dynamodb.conditions import Key
 
 class DynamoDBHelper:
     def __init__(self):
@@ -12,17 +12,17 @@ class DynamoDBHelper:
                 Item=train_item
             )
         except Exception as e:
-            print(f"Failed to add Item to dynamo with partition key {train_item} with exception {e}")
+            raise Exception(f"Failed to add Item to dynamo with partition key {train_item} with exception {e}")
 
-    def get_item(self, primary_key):
+    def get_items_date(self, primary_key, date):
         try:
-            item = self.table.get_item(
-                Key={
-                    'train_identifier': primary_key
-                }
+            item = self.table.query(
+                IndexName="updated_date_lsi",
+                KeyConditionExpression=Key('train_identifier').eq(primary_key) &
+                                       Key('last_updated_date').gt(date)
             )
-            if "Item" in item:
-                return item["Item"]
+            if "Items" in item:
+                return item["Items"]
         except Exception as e:
-            printf(f"Failed to get item with primary key of {primary_key} with exception {e}")
+            raise Exception(f"Failed to get item with primary key of {primary_key} with exception {e}")
             return None

@@ -15,4 +15,4 @@ class S3Helper:
                 Key=file_name
             )
         except Exception as e:
-            printf(f"Unable to add to S3 Bucket for item {file_name} and error {e}")
+            print(f"Unable to add to S3 Bucket for item {file_name} and error {e}")

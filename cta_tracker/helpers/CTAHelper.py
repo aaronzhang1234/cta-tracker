@@ -1,7 +1,7 @@
 import requests
 import os
 import datetime
-import time
+import uuid
 
 class CTAHelper:
     def get_locations_response(self):
@@ -11,22 +11,28 @@ class CTAHelper:
         return cta_response.json()
 
     def get_train_id(self, route_name, train_json):
-        return "-".join([route_name,
-                     train_json["trDr"],
-                     train_json["rn"],
-                     time.strftime("%Y%m%d")])
+        primary_key = "-".join([route_name,
+                     train_json["trDr"]])
+        hash_key = str(uuid.uuid4())
+        return primary_key, hash_key
 
     def get_next_train_station(self, train_json):
         return train_json["nextStaId"], train_json["arrT"]
 
-    def create_train_item(self, primary_key, route_name, train_json):
+    def create_train_item(self, primary_key, hash_key, route_name, train_json):
+        current_datetime = datetime.datetime.now()
+        current_date = current_datetime.strftime("%Y-%m-%d")
         nextStaId, arrivalTime = self.get_next_train_station(train_json)
         return {
             "train_identifier": primary_key,
+            "train_uuid": hash_key,
             "route_name": route_name,
             "direction_code": train_json["trDr"],
             "route_number": train_json["rn"],
+            "train_date": current_date,
             "train_schedule": {nextStaId: arrivalTime},
             "delayed": train_json["isDly"],
-            "created_timestamp": datetime.datetime.now().isoformat()
+            "created_timestamp": current_datetime.isoformat(),
+            "last_updated_date": current_datetime.isoformat(),
+            "last_updated_epoch": current_datetime.strftime("%s")
         }

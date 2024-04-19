@@ -21,7 +21,6 @@ Resources:
             TableName: cta_tracker
         - S3CrudPolicy:
             BucketName: cta-jsons
-
       Environment:
         Variables:
           API_KEY:
@@ -32,6 +31,14 @@ Resources:
             Schedule: "rate(1 minute)"
             Description: "Runs every 1 minute to get CTA schedules"
             Name: "CTA-TRACKER-SCHEDULE"
+  HelperLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: helper_layer
+      CompatibleRuntimes:
+        - python3.10
+    Metadata:
+      BuildMethod: python3.9
 
 Outputs:
   # Find out more about other implicit resources you can reference within SAM

@@ -19,7 +19,8 @@ class DynamoDBHelper:
             item = self.table.query(
                 IndexName="updated_date_lsi",
                 KeyConditionExpression=Key('train_identifier').eq(primary_key) &
-                                       Key('last_updated_date').gt(date)
+                                       Key('last_updated_date').gt(date),
+                Limit=20
             )
             if "Items" in item:
                 return item["Items"]

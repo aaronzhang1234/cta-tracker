@@ -8,6 +8,15 @@ Globals:
     Timeout: 20
 
 Resources:
+  HelperLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: helper_layer
+      ContentUri: helper_layer
+      CompatibleRuntimes:
+        - python3.10
+    Metadata:
+      BuildMethod: python3.10
   CTATrackerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -21,10 +30,11 @@ Resources:
             TableName: cta_tracker
         - S3CrudPolicy:
             BucketName: cta-jsons
-
       Environment:
         Variables:
           API_KEY:
+      Layers:
+        - !Ref HelperLayer
       Events:
         ScheduledRun:
           Type: Schedule # https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#schedule
@@ -32,13 +42,42 @@ Resources:
             Schedule: "rate(1 minute)"
             Description: "Runs every 1 minute to get CTA schedules"
             Name: "CTA-TRACKER-SCHEDULE"
-
+  CTALambda:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: cta_reconciler/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: cta_tracker
+        - S3CrudPolicy:
+            BucketName: cta-jsons
+      Environment:
+        Variables:
+          API_KEY:
+      Layers:
+        - !Ref HelperLayer
+      Events:
+        API:
+          Type: Api # https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#schedule
+          Properties:
+            Path: /trains
+            Method: get
 Outputs:
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   CTATrackerFunction:
     Description: "CTA Tracker Lambda"
     Value: !GetAtt CTATrackerFunction.Arn
+  CTALambdaFunction:
+    Description: "CTA Lambda Lambda"
+    Value: !GetAtt CTALambdaFunction.Arn
   CTATrackerFunctionIamRole:
     Description: "CTA Tracker IAM Role"
     Value: !GetAtt CTATrackerFunctionRole.Arn
+  CTALambdaFunctionIamRole:
+    Description: "CTA Lambda IAM Role"
+    Value: !GetAtt CTALambdaFunctionRole.Arn

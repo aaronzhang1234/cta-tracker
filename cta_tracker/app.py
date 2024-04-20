@@ -1,10 +1,8 @@
-import json
 import requests
-import boto3
 
-from helpers.DynamoDBHelper import DynamoDBHelper
-from helpers.CTAHelper import CTAHelper
-from helpers.S3Helper import S3Helper
+from helper_layer.DynamoDBHelper import DynamoDBHelper
+from helper_layer.CTAHelper import CTAHelper
+from helper_layer.S3Helper import S3Helper
 import datetime
 
 

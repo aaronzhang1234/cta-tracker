@@ -21,14 +21,12 @@ def lambda_handler(event, context):
         routes = cta_json["ctatt"]["route"]
         for route in routes:
             route_name = route["@name"]
-            if route_name != "red":
-                continue
             if "train" not in route:
                 print(f"No trains for {route_name}")
                 continue
             trains = route["train"] if isinstance(route["train"], list) else [
                 route["train"]]  #Sometimes the API will return back a single train object not in a list
-            mins_ago = (datetime.datetime.now() - datetime.timedelta(minutes=5)).isoformat()
+            mins_ago = (datetime.datetime.now() - datetime.timedelta(minutes=10)).isoformat()
             combined_trains = (dynamo_helper.get_items_date(route_name + "-1", mins_ago) +
                                dynamo_helper.get_items_date(route_name + "-5", mins_ago))
             for train in trains:

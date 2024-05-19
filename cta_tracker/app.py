@@ -1,17 +1,15 @@
-import json
 import requests
-import boto3
 
-from helpers.DynamoDBHelper import DynamoDBHelper
-from helpers.CTAHelper import CTAHelper
-from helpers.S3Helper import S3Helper
+from cta_helper import CTAHelper
+from dynamo_helper import DynamoHelper
+from s3_helper import S3Helper
 import datetime
 
 
 def lambda_handler(event, context):
     current_datetime = datetime.datetime.now()
     current_date = current_datetime.strftime("%Y-%m-%d")
-    dynamo_helper = DynamoDBHelper()
+    dynamo_helper = DynamoHelper()
     s3_helper = S3Helper()
     cta_helper = CTAHelper()
     try:

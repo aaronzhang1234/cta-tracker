@@ -1,7 +1,7 @@
 import boto3
 from boto3.dynamodb.conditions import Key
 
-class DynamoDBHelper:
+class DynamoHelper:
     def __init__(self):
         dynamodb = boto3.resource('dynamodb')
         self.table = dynamodb.Table('cta_tracker')

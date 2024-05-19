@@ -20,6 +20,8 @@ Resources:
   CTATrackerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
+      Layers:
+        - !Ref HelperLayer
       CodeUri: cta_tracker/
       Handler: app.lambda_handler
       Runtime: python3.10
@@ -42,6 +44,7 @@ Resources:
             Schedule: "rate(1 minute)"
             Description: "Runs every 1 minute to get CTA schedules"
             Name: "CTA-TRACKER-SCHEDULE"
+            
   CTALambda:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -66,6 +69,16 @@ Resources:
           Properties:
             Path: /trains
             Method: get
+            
+  HelperLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: helper_layer
+      CompatibleRuntimes:
+        - python3.10
+    Metadata:
+      BuildMethod: python3.9
+
 Outputs:
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api

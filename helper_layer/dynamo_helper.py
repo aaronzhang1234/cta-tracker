@@ -15,7 +15,9 @@ class DynamoHelper:
         except Exception as e:
             raise Exception(f"Failed to add Item to dynamo with partition key {train_item} with exception {e}")
 
-    def get_items_date(self, primary_key, start_time, end_time=datetime.now().isoformat()):
+    def get_items_date(self, primary_key, start_time=None, end_time=None):
+        if end_time is None:
+            end_time = datetime.now().isoformat()
         try:
             item = self.table.query(
                 IndexName="updated_date_lsi",

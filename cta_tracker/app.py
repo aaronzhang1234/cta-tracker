@@ -1,15 +1,15 @@
 import requests
 
-from helper_layer.helpers import DynamoDBHelper
-from helper_layer.helpers import CTAHelper
-from helper_layer.helpers import S3Helper
+from cta_helper import CTAHelper
+from dynamo_helper import DynamoHelper
+from s3_helper import S3Helper
 import datetime
 
 
 def lambda_handler(event, context):
     current_datetime = datetime.datetime.now()
     current_date = current_datetime.strftime("%Y-%m-%d")
-    dynamo_helper = DynamoDBHelper()
+    dynamo_helper = DynamoHelper()
     s3_helper = S3Helper()
     cta_helper = CTAHelper()
     try:

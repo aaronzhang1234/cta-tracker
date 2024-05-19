@@ -14,7 +14,7 @@ Resources:
       Layers:
         - !Ref HelperLayer
       CodeUri: cta_tracker/
-      Handler: app.lambda_handler
+      Handler: tracker_app.lambda_handler
       Runtime: python3.10
       Architectures:
         - x86_64
@@ -33,6 +33,29 @@ Resources:
             Schedule: "rate(1 minute)"
             Description: "Runs every 1 minute to get CTA schedules"
             Name: "CTA-TRACKER-SCHEDULE"
+            
+  CTAReconciler:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: cta_reconciler/
+      Handler: reconciler_app.lambda_handler
+      Runtime: python3.10
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: cta_tracker
+        - S3CrudPolicy:
+            BucketName: cta-jsons
+      Layers:
+        - !Ref HelperLayer
+      Events:
+        API:
+          Type: Api # https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#schedule
+          Properties:
+            Path: /trains
+            Method: get
+            
   HelperLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -48,6 +71,12 @@ Outputs:
   CTATrackerFunction:
     Description: "CTA Tracker Lambda"
     Value: !GetAtt CTATrackerFunction.Arn
+  CTAReconcilerFunction:
+    Description: "CTA Reconciler Lambda"
+    Value: !GetAtt CTAReconciler.Arn
   CTATrackerFunctionIamRole:
     Description: "CTA Tracker IAM Role"
     Value: !GetAtt CTATrackerFunctionRole.Arn
+  CTAReconcilerFunctionIamRole:
+    Description: "CTA Reconciler IAM Role"
+    Value: !GetAtt CTAReconcilerRole.Arn

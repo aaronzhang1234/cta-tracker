@@ -1,5 +1,6 @@
 import boto3
 from boto3.dynamodb.conditions import Key
+from datetime import datetime
 
 class DynamoHelper:
     def __init__(self):
@@ -14,12 +15,12 @@ class DynamoHelper:
         except Exception as e:
             raise Exception(f"Failed to add Item to dynamo with partition key {train_item} with exception {e}")
 
-    def get_items_date(self, primary_key, date):
+    def get_items_date(self, primary_key, start_time, end_time=datetime.now().isoformat()):
         try:
             item = self.table.query(
                 IndexName="updated_date_lsi",
                 KeyConditionExpression=Key('train_identifier').eq(primary_key) &
-                                       Key('last_updated_date').gt(date)
+                                       Key('last_updated_date').between(start_time, end_time)
             )
             if "Items" in item:
                 return item["Items"]

@@ -6,27 +6,29 @@ from collections import OrderedDict
 from helper_layer.DynamoDBHelper import DynamoDBHelper
 
 def lambda_handler(event, context):
-    color_rt = "pink-5"
+    color_rt = "brn-1"
     dynamo_helper = DynamoDBHelper()
     one_day_ago = (datetime.datetime.now() - datetime.timedelta(days=1)).isoformat()
     items = dynamo_helper.get_items_date(color_rt, one_day_ago)
-    #color_order = station_order[color_rt]
+    color_order = station_order[color_rt]
     for item in items:
         sched = item["train_schedule"]
         wut = OrderedDict(sorted(sched.items(), key=lambda x: parse(x[1])))
         print(list(wut.keys()))
+        if len(sched) == len(color_order):
+            getTimesBetween(color_order, sched)
+        else:
+            diff = set(color_order) - set(sched.keys())
+            for station in diff:
+                print(station_dict[station], end="|")
+            print("")
+
     wut = OrderedDict(sorted(items[6]["train_schedule"].items(), key=lambda x: parse(x[1])))
     for key in wut:
-        value = items[6]["train_schedule"][key]
+        value = items[1]["train_schedule"][key]
         name = station_dict.get(key)
         print(f"{name} , {value}")
-#        if len(sched) == len(color_order):
-#            getTimesBetween(color_order, sched)
-#        else:
-#            diff = set(color_order) - set(sched.keys())
-#            for station in diff:
-#                print(station_dict[station], end="|")
-#            print("")
+
     return {
        "statusCode": 200}
 

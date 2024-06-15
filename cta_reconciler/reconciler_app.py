@@ -25,10 +25,8 @@ def lambda_handler(event, context):
         if not len(sched) == len(color_order):
             diff = set(color_order) - set(sched.keys())
             train_item["missing_stations"] = list(diff)
-            train_item["missing_stations_eng"] = [station_dict[station] for station in diff]
-        train_item["total_time"] = getTimesBetween(stops)
-        train_item["train_stops_eng"] = [station_dict[station] for station in stops]
         train_item["train_stops"] = list(stops.keys())
+        train_item["stop_times"] = list(stops.values())
         response_key = item["route_number"] + " | " + item["created_timestamp"]
         response[response_key] = train_item
     return {

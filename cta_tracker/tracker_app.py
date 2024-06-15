@@ -43,7 +43,6 @@ def lambda_handler(event, context):
                 except Exception as e:
                     print(f"Error parsing train with information {train}, error is {e}")
                     continue
-
     except requests.RequestException as e:
         raise e
     return {
@@ -65,6 +64,7 @@ def update_schedule(train_item, next_sta_id, arrival_time):
         train_schedule[next_sta_id] = arrival_time
         train_item["last_updated_date"] = datetime.datetime.now().isoformat()
         return train_item
+    #TODO Figure out how to return None in case not updateable.
 
 
 if __name__ == "__main__":

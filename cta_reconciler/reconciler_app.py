@@ -33,6 +33,11 @@ def lambda_handler(event, context):
         response[response_key] = train_item
     return {
         "body": json.dumps(response),
+        "headers": {
+            'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        },
         "statusCode": 200}
 
 def getTimesBetween(stops):

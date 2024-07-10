@@ -43,4 +43,5 @@ class CTAHelper:
             "last_updated_epoch": current_datetime.strftime("%s")
         }
     def get_first_station(self, route):
+        #TODO Add Green line routes
         return station_order[route][0]

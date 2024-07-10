@@ -26,7 +26,7 @@ class CTAHelper:
         nextStaId, arrivalTime = self.get_next_train_station(train_json)
         #TODO Start the schedule JSON with the first station
         train_schedule = {
-            self.get_first_station(primary_key): current_datetime,
+            self.get_first_station(primary_key): current_datetime.isoformat(),
             nextStaId: arrivalTime
         }
         return {

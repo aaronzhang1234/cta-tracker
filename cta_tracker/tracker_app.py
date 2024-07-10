@@ -59,6 +59,7 @@ def get_updatable_object(train_item, dynamo_items):
 
 
 def update_schedule(train_item, next_sta_id, arrival_time):
+    #TODO Account for skipped train stations?
     train_schedule = train_item["train_schedule"]
     if not (next_sta_id in train_schedule and train_schedule[next_sta_id] == arrival_time):
         train_schedule[next_sta_id] = arrival_time

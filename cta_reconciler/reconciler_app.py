@@ -15,20 +15,19 @@ def lambda_handler(event, context):
     end_time = event["headers"]["end_time"]
     items = dynamo_helper.get_items_date(color_rt, start_time, end_time)
 
-    color_order = station_order[color_rt]
     response = {"no_of_trains": len(items)}
+    trains_item = {}
     for item in items:
         train_item = {"route_number": item["route_number"], "start_time": item["created_timestamp"]}
 
         sched = item["train_schedule"]
-        stops = OrderedDict(sorted(sched.items(), key=lambda x: parse(x[1])))
-        if not len(sched) == len(color_order):
-            diff = set(color_order) - set(sched.keys())
-            train_item["missing_stations"] = list(diff)
+        stops = get_schedule_with_missing(sched, color_rt)
+
         train_item["train_stops"] = list(stops.keys())
         train_item["stop_times"] = list(stops.values())
         response_key = item["route_number"] + " | " + item["created_timestamp"]
-        response[response_key] = train_item
+        trains_item[response_key] = train_item
+    response["trains"] = trains_item
     return {
         "body": json.dumps(response),
         "headers": {
@@ -38,7 +37,17 @@ def lambda_handler(event, context):
         },
         "statusCode": 200}
 
-def getTimesBetween(stops):
+def get_schedule_with_missing(schedule, color_rt):
+    stop_time_dict = {}
+    color_order = station_order[color_rt]
+    for stop in color_order:
+        if schedule.has_key(stop):
+            stop_time_dict[stop] = schedule[stop]
+        else:
+            stop_time_dict[stop] = None
+    return stop_time_dict
+
+def get_times_between(stops):
         first_stop = list(stops.keys())[0]
         last_stop = list(stops.keys())[len(stops.keys())-1]
         first = convert_to_date_obj(stops[first_stop])

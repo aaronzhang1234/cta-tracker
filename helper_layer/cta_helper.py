@@ -2,6 +2,7 @@ import requests
 import os
 import datetime
 import uuid
+from stations import station_order
 
 class CTAHelper:
     def get_locations_response(self):
@@ -23,6 +24,11 @@ class CTAHelper:
         current_datetime = datetime.datetime.now()
         current_date = current_datetime.strftime("%Y-%m-%d")
         nextStaId, arrivalTime = self.get_next_train_station(train_json)
+        #TODO Start the schedule JSON with the first station
+        train_schedule = {
+            self.get_first_station(primary_key): current_datetime,
+            nextStaId: arrivalTime
+        }
         return {
             "train_identifier": primary_key,
             "train_uuid": hash_key,
@@ -30,9 +36,11 @@ class CTAHelper:
             "direction_code": train_json["trDr"],
             "route_number": train_json["rn"],
             "train_date": current_date,
-            "train_schedule": {nextStaId: arrivalTime},
+            "train_schedule": train_schedule,
             "delayed": train_json["isDly"],
             "created_timestamp": current_datetime.isoformat(),
             "last_updated_date": current_datetime.isoformat(),
             "last_updated_epoch": current_datetime.strftime("%s")
         }
+    def get_first_station(self, route):
+        return station_order[route][0]

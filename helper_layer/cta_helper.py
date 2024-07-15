@@ -2,7 +2,7 @@ import requests
 import os
 import datetime
 import uuid
-from stations import station_order
+from stations import route_order, station_dict
 
 class CTAHelper:
     def get_locations_response(self):
@@ -44,4 +44,9 @@ class CTAHelper:
         }
     def get_first_station(self, route):
         #TODO Add Green line routes
-        return station_order[route][0]
+        return route_order[route][0]
+
+    def get_route_order(self, route):
+        return route_order[route]
+
+

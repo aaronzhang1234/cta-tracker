@@ -13,7 +13,7 @@ def lambda_handler(event, context):
 
     color_rt = event["headers"]["route"]
     start_time = event["headers"]["start_time"]
-    #TODO make end time optional
+    #TODO make end time optional poop
     end_time = event["headers"]["end_time"]
     items = dynamo_helper.get_items_date(color_rt, start_time, end_time)
 

@@ -41,7 +41,7 @@ def lambda_handler(event, context):
                     else:
                         train_item = cta_helper.create_train_item(route_name, train)
                         dynamo_helper.add_to_dynamo(train_item)
-                        print(f"Added! {train_item["train_identifier"]} | {train_identifier["train_uuid"]}")
+                        print(f"Added! {train_item['train_identifier']} | {train_item['train_uuid']}")
                 except Exception as e:
                     print(f"Error parsing train with information {train}, error is {e}")
                     continue

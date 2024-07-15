@@ -8,7 +8,6 @@ import datetime
 
 def lambda_handler(event, context):
     current_datetime = datetime.datetime.now()
-    current_date = current_datetime.strftime("%Y-%m-%d")
     dynamo_helper = DynamoHelper()
     s3_helper = S3Helper()
     cta_helper = CTAHelper()
@@ -31,15 +30,18 @@ def lambda_handler(event, context):
                 try:
                     updatable_object = get_updatable_object(train, combined_trains)
                     if updatable_object:
+                        train_identifier, train_uuid = dynamo_helper.get_train_keys(updatable_object)
                         next_sta_id, arr_time = cta_helper.get_next_train_station(train)
                         updated_object = update_schedule(updatable_object, next_sta_id, arr_time)
-                        dynamo_helper.add_to_dynamo(updated_object)
-                        print(f"Updated! {updated_object['route_number']}-{updated_object['direction_code']}")
+                        if updated_object is not None:
+                            dynamo_helper.add_to_dynamo(updated_object)
+                            print(f"Updated! {train_identifier} | {train_uuid}")
+                        else:
+                            print(f"Skipped {train_identifier} | {train_uuid}")
                     else:
-                        primary_key, hash_key = cta_helper.get_train_id(route_name, train)
-                        train_item = cta_helper.create_train_item(primary_key, hash_key, route_name, train)
+                        train_item = cta_helper.create_train_item(route_name, train)
                         dynamo_helper.add_to_dynamo(train_item)
-                        print(f"Added! {train_item['route_number']}-{train_item['direction_code']}")
+                        print(f"Added! {train_item["train_identifier"]} | {train_identifier["train_uuid"]}")
                 except Exception as e:
                     print(f"Error parsing train with information {train}, error is {e}")
                     continue
@@ -50,8 +52,8 @@ def lambda_handler(event, context):
     }
 
 
-def get_updatable_object(train_item, dynamo_items):
-    for dynamo_item in dynamo_items:
+def get_updatable_object(train_item, combined_trains):
+    for dynamo_item in combined_trains:
         if (dynamo_item["route_number"] == train_item["rn"] and
                 dynamo_item["direction_code"] == train_item["trDr"]):
             return dynamo_item
@@ -65,7 +67,7 @@ def update_schedule(train_item, next_sta_id, arrival_time):
         train_schedule[next_sta_id] = arrival_time
         train_item["last_updated_date"] = datetime.datetime.now().isoformat()
         return train_item
-    #TODO Figure out how to return None in case not updateable.
+    return None
 
 
 if __name__ == "__main__":

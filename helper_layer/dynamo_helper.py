@@ -14,7 +14,9 @@ class DynamoHelper:
             )
         except Exception as e:
             raise Exception(f"Failed to add Item to dynamo with partition key {train_item} with exception {e}")
-
+    def get_train_keys(self, train_item):
+        if train_item:
+            return train_item["train_identifier"], train_item["train_uuid"]
     def get_items_date(self, primary_key, start_time=None, end_time=None):
         if end_time is None:
             end_time = datetime.now().isoformat()

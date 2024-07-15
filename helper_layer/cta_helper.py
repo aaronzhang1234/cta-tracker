@@ -20,30 +20,29 @@ class CTAHelper:
     def get_next_train_station(self, train_json):
         return train_json["nextStaId"], train_json["arrT"]
 
-    def create_train_item(self, primary_key, hash_key, route_name, train_json):
+    def create_train_item(self, route_name, train):
+        train_identifier, train_uuid = self.get_train_id(route_name, train)
         current_datetime = datetime.datetime.now()
         current_date = current_datetime.strftime("%Y-%m-%d")
-        nextStaId, arrivalTime = self.get_next_train_station(train_json)
-        #TODO Start the schedule JSON with the first station
+        nextStaId, arrivalTime = self.get_next_train_station(train)
         train_schedule = {
-            self.get_first_station(primary_key): current_datetime.isoformat(),
+            self.get_first_station(train_identifier): current_datetime.isoformat(),
             nextStaId: arrivalTime
         }
         return {
-            "train_identifier": primary_key,
-            "train_uuid": hash_key,
+            "train_identifier": train_identifier,
+            "train_uuid": train_uuid,
             "route_name": route_name,
-            "direction_code": train_json["trDr"],
-            "route_number": train_json["rn"],
+            "direction_code": train["trDr"],
+            "route_number": train["rn"],
             "train_date": current_date,
             "train_schedule": train_schedule,
-            "delayed": train_json["isDly"],
+            "delayed": train["isDly"],
             "created_timestamp": current_datetime.isoformat(),
             "last_updated_date": current_datetime.isoformat(),
             "last_updated_epoch": current_datetime.strftime("%s")
         }
     def get_first_station(self, route):
-        #TODO Add Green line routes
         return route_order[route][0]
 
     def get_route_order(self, route):

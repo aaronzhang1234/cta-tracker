@@ -26,7 +26,7 @@ class CTAHelper:
         current_date = current_datetime.strftime("%Y-%m-%d")
         next_sta_id, arrival_time = self.get_next_train_station(train)
         train_schedule = {
-            self.get_previous_station(route_name, next_sta_id): current_datetime,
+            self.get_previous_station(route_name, next_sta_id): current_datetime.isoformat(),
             next_sta_id: arrival_time
         }
         return {

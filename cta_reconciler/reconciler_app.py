@@ -18,7 +18,7 @@ def lambda_handler(event, context):
     items = dynamo_helper.get_items_date(color_rt, start_time, end_time)
 
     response = {"no_of_trains": len(items)}
-    trains_item = {}
+    trains_item = []
     for item in items:
         train_item = {"route_number": item["route_number"], "start_time": item["created_timestamp"]}
 
@@ -28,8 +28,7 @@ def lambda_handler(event, context):
         #We are returning this in lists because lists keep their order. Dicts do not.
         train_item["train_stops"] = list(stops.keys())
         train_item["stop_times"] = list(stops.values())
-        response_key = item["route_number"] + " | " + item["created_timestamp"]
-        trains_item[response_key] = train_item
+        trains_item.append(train_item)
     response["trains"] = trains_item
     return {
         "body": json.dumps(response),

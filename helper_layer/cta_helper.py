@@ -21,16 +21,16 @@ class CTAHelper:
         return train_json["nextStaId"], train_json["arrT"]
 
     def create_train_item(self, route_name, train):
-        train_identifier, train_uuid = self.get_train_id(route_name, train)
+        route_name, train_uuid = self.get_train_id(route_name, train)
         current_datetime = datetime.datetime.now()
         current_date = current_datetime.strftime("%Y-%m-%d")
-        nextStaId, arrivalTime = self.get_next_train_station(train)
+        next_sta_id, arrival_time = self.get_next_train_station(train)
         train_schedule = {
-            self.get_first_station(train_identifier): current_datetime.isoformat(),
-            nextStaId: arrivalTime
+            self.get_previous_station(route_name, next_sta_id): current_datetime,
+            next_sta_id: arrival_time
         }
         return {
-            "train_identifier": train_identifier,
+            "train_identifier": route_name,
             "train_uuid": train_uuid,
             "route_name": route_name,
             "direction_code": train["trDr"],
@@ -42,8 +42,13 @@ class CTAHelper:
             "last_updated_date": current_datetime.isoformat(),
             "last_updated_epoch": current_datetime.strftime("%s")
         }
-    def get_first_station(self, route):
-        return route_order[route][0]
+
+    def get_previous_station(self, route_name, next_sta_id):
+        sta_route_order = route_order[route_name]
+        station_index = sta_route_order.index(next_sta_id)
+        if station_index == 0:
+            return sta_route_order[0]
+        return sta_route_order[station_index-1]
 
     def get_route_order(self, route):
         return route_order[route]

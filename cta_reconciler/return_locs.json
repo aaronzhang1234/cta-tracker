@@ -1,0 +1,8 @@
+{
+  "resource": "/trains",
+  "path": "/trains",
+  "httpMethod": "GET",
+  "headers": {
+    "return_loc": "true"
+  }
+}

@@ -18,12 +18,14 @@ Scheduled lambda that runs every 1 minute to get CTA data.
 ```json
 {
   "no_of_trains": (Number of Trains in Response),
+  "stops" : (List of Stops for this route),
+  "route" : (Route of this request),
   "trains": [
     {
       "route_number" : (CTA Train Number),
       "start_time" : (Time when train object was created),
-      "train_stops" : (List of Stops for this train),
-      "stop_times" :  (Stop times, correspond to train_stop location, can be Null if not available) 
+      "stop_times" :  (Stop times, correspond to train_stop location, can be Null if not available),
+      "total_time" : (Total time of the trip)
     }....
   ]
 }

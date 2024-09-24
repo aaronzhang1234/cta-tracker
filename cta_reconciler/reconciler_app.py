@@ -60,9 +60,12 @@ def get_stops_response(event):
         train_item["stop_times"] = stop_list
         train_item["total_time"] = None
 
-        #TODO Determine way to get lenth of train route
-        if stop_list[0] and stop_list[len(stop_list)-1]:
-            train_item["total_time"] =  None
+        if stop_list[-1]:
+            total_time = int((convert_to_date_obj(stop_list[-1]) - convert_to_date_obj(item["created_timestamp"])).total_seconds())
+            hours, remainder = divmod(total_time, 60*60)
+            minutes, seconds = divmod(remainder, 60)
+            train_item["total_time"] = f"{hours}:{minutes}:{seconds}"
+
         train_items.append(train_item)
 
         df.loc[item["route_number"]] = stop_list
@@ -90,11 +93,13 @@ def pandas_fun(df):
         times_between_stops = df[columns[idx+1]] - df[columns[idx]]
         column_name = f"{columns[idx]} - {columns[idx+1]}"
         times_between[column_name] = times_between_stops
+    print(times_between.sum())
     print(times_between.mean())
 
 
 def convert_to_date_obj(date_str):
-    return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
+    no_micro = date_str.split(".")[0]
+    return datetime.datetime.strptime(no_micro, "%Y-%m-%dT%H:%M:%S")
 
 
 if __name__ == "__main__":

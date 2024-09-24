@@ -9,20 +9,30 @@ import json
 
 
 def lambda_handler(event, context):
-    return_locs = event["headers"]["return_loc"]
-    if return_locs == "true":
-        s3_helper = S3Helper()
-        response = s3_helper.get_file("current_locs.json")
-    else:
-        response = json.dumps(get_stops_response(event))
-    return {
-        "body": response,
-        "headers": {
-            'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-        },
-        "statusCode": 200}
+    try:
+        if "return_loc" in event["headers"]:
+            s3_helper = S3Helper()
+            response = s3_helper.get_file("current_locs.json")
+        else:
+            response = json.dumps(get_stops_response(event))
+        return {
+            "body": response,
+            "headers": {
+                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "statusCode": 200}
+    except Exception as e:
+        return {
+            "body": str(e),
+            "headers": {
+                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "statusCode": 500}
+
 
 
 def get_stops_response(event):

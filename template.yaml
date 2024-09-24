@@ -4,6 +4,11 @@ Description: >
   cta-tracker
 
 Globals:
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'Content-Type, start_time, end_time, route'"
+      AllowOrigin: "'*'"
   Function:
     Timeout: 20
 

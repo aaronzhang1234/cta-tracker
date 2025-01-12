@@ -20,6 +20,10 @@ Scheduled lambda that runs every 1 minute to get CTA data.
   "no_of_trains": (Number of Trains in Response),
   "stops" : (List of Stops for this route),
   "route" : (Route of this request),
+  "stats": {
+   "avg_total_time": (Average time of all trains),
+   "avg_time_between_stops" : (Average time between each stop, First value is from creation date to first stop),
+  },
   "trains": [
     {
       "route_number" : (CTA Train Number),
@@ -31,6 +35,12 @@ Scheduled lambda that runs every 1 minute to get CTA data.
 }
 
 ```
+## Local Setup
+
+Add helper_layer as a source folder on Pycharm. `Settings > Project Structure`
+
+You need to configure the AWS profile for local development. Either create a new access-id/secret or reuse a previous one.
+
 
 ## SAM i am
 

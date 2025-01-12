@@ -72,6 +72,8 @@ fake_dynamo = [
 
 
 def lambda_handler(event, context):
+    print("Starting Lambda")
+    print(event)
     try:
         if "return_loc" in event["headers"]:
             s3_helper = S3Helper()
@@ -100,11 +102,15 @@ def lambda_handler(event, context):
 def get_stops_response(event):
     dynamo_helper = DynamoHelper()
     cta_helper = CTAHelper()
+
     color_rt = event["headers"]["route"]
     start_time = event["headers"]["start_time"]
     # TODO make end time optional
     end_time = event["headers"]["end_time"]
+
     items = fake_dynamo  #dynamo_helper.get_items_date(color_rt, start_time, end_time)
+    print(items)
+
     stop_ids = cta_helper.get_route_order(color_rt)
     stop_ids.insert(0, "Created Time")
     response = {"no_of_trains": len(items), "stops": stop_ids, "route": color_rt}
@@ -118,7 +124,7 @@ def get_stops_response(event):
         stop_list = get_schedule_with_missing(sched, stop_ids, item["created_timestamp"])
 
         # We are returning this in lists because lists keep their order. Dicts do not.
-        #train_item["stop_times"] = stop_list
+        train_item["stop_times"] = stop_list
         train_item["total_time"] = None
 
         if stop_list[-1]:

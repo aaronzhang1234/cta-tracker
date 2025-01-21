@@ -158,6 +158,7 @@ def pandas_fun(df):
         df[column] = pd.to_datetime(df[column], format="ISO8601")
 
     average_stats["avg_total_time"] = timedelta_to_string((df[df.columns[-1]] - df[df.columns[0]]).mean())
+    #Return dict of key {stopid-stopid} and value {mean_between_station}
     average_stats["avg_time_between_stops"] = get_mean_times_between_stations(df)
     return average_stats
 
@@ -170,7 +171,11 @@ def get_mean_times_between_stations(df):
         times_between[column_name] = times_between_stops
 
     mean_series = times_between.mean()
-    return [timedelta_to_string(item) for item in mean_series]
+    mean_dict = {}
+    for index,item in mean_series.items():
+        mean_dict[index] = timedelta_to_string(item)
+    return mean_dict
+    #return [timedelta_to_string(item) for item in mean_series]
 
 def convert_to_date_obj(date_str):
     no_micro = date_str.split(".")[0]

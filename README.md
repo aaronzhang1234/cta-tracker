@@ -22,7 +22,7 @@ Scheduled lambda that runs every 1 minute to get CTA data.
   "route" : (Route of this request),
   "stats": {
    "avg_total_time": (Average time of all trains),
-   "avg_time_between_stops" : (Average time between each stop, First value is from creation date to first stop),
+   "avg_time_between_stops" : DICT (Average time between each stop, Key is stopid-stopid),
   },
   "trains": [
     {

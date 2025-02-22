@@ -1,11 +1,16 @@
 import boto3
 from boto3.dynamodb.conditions import Key
 from datetime import datetime
+import os
 
 class DynamoHelper:
     def __init__(self):
-        dynamodb = boto3.resource('dynamodb')
-        self.table = dynamodb.Table('cta_tracker')
+        if os.environ.get("ENV") == "LOCAL":
+            dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+            self.table = dynamodb.Table('cta_tracker')
+        else:
+            dynamodb = boto3.resource('dynamodb')
+            self.table = dynamodb.Table('cta_tracker')
 
     def add_to_dynamo(self, train_item):
         try:

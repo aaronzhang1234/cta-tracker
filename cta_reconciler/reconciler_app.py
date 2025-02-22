@@ -1,14 +1,15 @@
 import datetime
 
-from dateutil.parser import parse
-from collections import OrderedDict
 from dynamo_helper import DynamoHelper
 from cta_helper import CTAHelper
 from s3_helper import S3Helper
+import pandas as pd
 import json
-
+from panda_functions import pandas_fun, timedelta_to_string
 
 def lambda_handler(event, context):
+    print("Starting Lambda")
+    print(event)
     try:
         if "return_loc" in event["headers"]:
             s3_helper = S3Helper()
@@ -34,46 +35,67 @@ def lambda_handler(event, context):
             "statusCode": 500}
 
 
-
 def get_stops_response(event):
     dynamo_helper = DynamoHelper()
     cta_helper = CTAHelper()
+
     color_rt = event["headers"]["route"]
+    show_trains = event["headers"]["show_trains"]
     start_time = event["headers"]["start_time"]
+
     # TODO make end time optional
     end_time = event["headers"]["end_time"]
+
+
     items = dynamo_helper.get_items_date(color_rt, start_time, end_time)
-    response = {"no_of_trains": len(items)}
-    trains_item = []
+
+    stop_ids = cta_helper.get_route_order(color_rt)
+    stop_ids.insert(0, "Created Time")
+    response = {"no_of_trains": len(items), "route": color_rt}
+    train_items = []
+
+    df = pd.DataFrame(columns=stop_ids)
     for item in items:
-        train_item = {"route_number": item["route_number"], "start_time": item["created_timestamp"]}
+        train_item = {"route_number": item["route_number"], "start_time": item["created_timestamp"], "uuid":item["train_uuid"]}
 
         sched = item["train_schedule"]
-        stops = get_schedule_with_missing(sched, cta_helper.get_route_order(color_rt))
+        stop_list = get_schedule_with_missing(sched, stop_ids, item["created_timestamp"])
 
         # We are returning this in lists because lists keep their order. Dicts do not.
-        train_item["train_stops"] = list(stops.keys())
-        train_item["stop_times"] = list(stops.values())
-        trains_item.append(train_item)
-    response["trains"] = trains_item
+        train_item["stop_times"] = stop_list
+        train_item["total_time"] = None
+
+        if stop_list[-1]:
+            time_between = convert_to_date_obj(stop_list[-1]) - convert_to_date_obj(stop_list[0])
+            train_item["total_time"] = timedelta_to_string(time_between)
+
+        train_items.append(train_item)
+
+        df.loc[item["train_uuid"]] = stop_list
+    response["stats"] = pandas_fun(df)
+
+    if show_trains:
+        response["trains"] = train_items
+
     return response
 
 
-def get_schedule_with_missing(schedule, color_order):
-    stop_time_dict = {}
+def get_schedule_with_missing(schedule, color_order, created_time):
+    stop_time_list = [created_time]
     for stop in color_order:
+        if stop == "Created Time":
+            continue
         if stop in schedule:
-            stop_time_dict[stop] = schedule[stop]
+            stop_time_list.append(schedule[stop])
         else:
-            stop_time_dict[stop] = None
-    return stop_time_dict
-
+            stop_time_list.append(None)
+    return stop_time_list
 
 def convert_to_date_obj(date_str):
-    return datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
-
+    no_micro = date_str.split(".")[0]
+    return datetime.datetime.strptime(no_micro, "%Y-%m-%dT%H:%M:%S")
 
 if __name__ == "__main__":
-    f = open('return_locs.json')
+    f = open('event.json')
     event_json = json.load(f)
     print(lambda_handler(event=event_json, context=None))

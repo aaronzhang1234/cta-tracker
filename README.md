@@ -56,6 +56,7 @@ Add helper_layer as a source folder on Pycharm. `Settings > Project Structure`
 
 You need to configure the AWS profile for local development. Either create a new access-id/secret or reuse a previous one.
 
+This application uses local Dynamo to speed local development. [Deets in the link](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html)
 
 ## SAM i am
 

@@ -7,9 +7,13 @@ import pandas as pd
 import json
 from panda_functions import pandas_fun, timedelta_to_string
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+
 def lambda_handler(event, context):
-    print("Starting Lambda")
-    print(event)
+    logger.debug(event["headers"])
     try:
         if "return_loc" in event["headers"]:
             s3_helper = S3Helper()
@@ -19,16 +23,18 @@ def lambda_handler(event, context):
         return {
             "body": response,
             "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route',
+                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route, show_trains',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
             "statusCode": 200}
     except Exception as e:
+        logger.debug("Error in Lambda execution!")
+        logger.exception(e)
         return {
             "body": str(e),
             "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route',
+                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route, show_trains',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
@@ -70,8 +76,15 @@ def get_stops_response(event):
             train_item["total_time"] = timedelta_to_string(time_between)
 
         train_items.append(train_item)
+        try:
+            df.loc[item["train_uuid"]] = stop_list
+        except Exception as e:
+            logger.debug("item is", item)
+            logger.debug("# of stops is", len(stop_ids))
+            logger.debug("stop list is", stop_list)
+            logger.error(e)
+            raise Exception(e)
 
-        df.loc[item["train_uuid"]] = stop_list
     response["stats"] = pandas_fun(df)
 
     if show_trains:

@@ -29,8 +29,7 @@ def lambda_handler(event, context):
             },
             "statusCode": 200}
     except Exception as e:
-        logger.debug("Error in Lambda execution!")
-        logger.exception(e)
+        logger.exception("Error in Lambda Execution")
         return {
             "body": str(e),
             "headers": {
@@ -82,7 +81,6 @@ def get_stops_response(event):
             logger.debug("item is", item)
             logger.debug("# of stops is", len(stop_ids))
             logger.debug("stop list is", stop_list)
-            logger.error(e)
             raise Exception(e)
 
     response["stats"] = pandas_fun(df)

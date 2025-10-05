@@ -29,8 +29,7 @@ def lambda_handler(event, context):
             },
             "statusCode": 200}
     except Exception as e:
-        logger.debug("Error in Lambda execution!")
-        logger.exception(e)
+        logger.exception("Error in Lambda Execution")
         return {
             "body": str(e),
             "headers": {
@@ -55,7 +54,7 @@ def get_stops_response(event):
 
     items = dynamo_helper.get_items_date(color_rt, start_time, end_time)
 
-    stop_ids = cta_helper.get_route_order(color_rt)
+    stop_ids = cta_helper.get_route_order(color_rt).copy()
     stop_ids.insert(0, "Created Time")
     response = {"no_of_trains": len(items), "route": color_rt}
     train_items = []
@@ -80,9 +79,9 @@ def get_stops_response(event):
             df.loc[item["train_uuid"]] = stop_list
         except Exception as e:
             logger.debug("item is", item)
+            logger.debug("Route IDS are", stop_ids)
             logger.debug("# of stops is", len(stop_ids))
             logger.debug("stop list is", stop_list)
-            logger.error(e)
             raise Exception(e)
 
     response["stats"] = pandas_fun(df)

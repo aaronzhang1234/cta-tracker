@@ -1,19 +1,19 @@
 import datetime
-
 from dynamo_helper import DynamoHelper
 from cta_helper import CTAHelper
 from s3_helper import S3Helper
 import pandas as pd
 import json
 from panda_functions import pandas_fun, timedelta_to_string
-
 import logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.propagate = False
+from exceptions import NotFoundException, InternalException
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
-    logger.debug(event["headers"])
+    logger.info(msg="Received Event",
+                extra={"headers":event["headers"]})
     try:
         if "return_loc" in event["headers"]:
             s3_helper = S3Helper()
@@ -28,7 +28,16 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
             "statusCode": 200}
-    except Exception as e:
+    except NotFoundException as e:
+        return {
+            "body": str(e),
+            "headers": {
+                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route, show_trains',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "statusCode": 404}
+    except InternalException as e:
         logger.exception("Error in Lambda Execution")
         return {
             "body": str(e),
@@ -54,6 +63,9 @@ def get_stops_response(event):
 
     items = dynamo_helper.get_items_date(color_rt, start_time, end_time)
 
+    if len(items) == 0:
+        raise NotFoundException(message="No Trains Exist for Time Period", errors=None)
+    logger.info(f"Got {len(items)} from Dynamo DB")
     stop_ids = cta_helper.get_route_order(color_rt).copy()
     stop_ids.insert(0, "Created Time")
     response = {"no_of_trains": len(items), "route": color_rt}
@@ -78,12 +90,9 @@ def get_stops_response(event):
         try:
             df.loc[item["train_uuid"]] = stop_list
         except Exception as e:
-            logger.debug("item is", item)
-            logger.debug("Route IDS are", stop_ids)
-            logger.debug("# of stops is", len(stop_ids))
-            logger.debug("stop list is", stop_list)
-            raise Exception(e)
+            raise InternalException("Failed to find train_uuid", e)
 
+    logger.info(f"Got train items: {str(train_items)}")
     response["stats"] = pandas_fun(df)
 
     if show_trains:

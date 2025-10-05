@@ -1,4 +1,5 @@
 import pandas as pd
+import logging
 
 def pandas_fun(df):
     average_stats = {}
@@ -14,6 +15,7 @@ def pandas_fun(df):
 def get_full_route_stats(df):
     full_route_stats = {}
     total_time_series = df[df.columns[-1]] - df[df.columns[0]]
+
     full_route_stats["avg_total_time"] = timedelta_to_string(total_time_series.mean())
 
     full_route_stats["slowest_train"] = {}

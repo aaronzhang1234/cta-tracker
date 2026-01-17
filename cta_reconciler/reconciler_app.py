@@ -5,15 +5,15 @@ from s3_helper import S3Helper
 import pandas as pd
 import json
 from panda_functions import pandas_fun, timedelta_to_string
-import logging
+from aws_lambda_powertools import Logger
 from exceptions import NotFoundException, InternalException
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger = Logger()
 
+@logger.inject_lambda_context(clear_state=True, log_event=True)
 def lambda_handler(event, context):
-    logger.info(msg="Received Event",
-                extra={"headers":event["headers"]})
+    logger.append_keys(client_correlation_id=event["headers"]["client_correlation_id"])
+    logger.info("Received Event", headers=event["headers"])
     try:
         if "return_loc" in event["headers"]:
             s3_helper = S3Helper()
@@ -23,26 +23,27 @@ def lambda_handler(event, context):
         return {
             "body": response,
             "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route, show_trains',
+                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route, show_trains, client_correlation_id',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
             "statusCode": 200}
     except NotFoundException as e:
+        logger.exception("No trains found for timerange", headers=event["headers"])
         return {
             "body": str(e),
             "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route, show_trains',
+                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route, show_trains, client_correlation_id',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
             "statusCode": 404}
     except InternalException as e:
-        logger.exception("Error in Lambda Execution")
+        logger.exception("Error in Lambda Execution", error=e)
         return {
             "body": str(e),
             "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route, show_trains',
+                'Access-Control-Allow-Headers': 'Content-Type, start_time, end_time, route, show_trains, client_correlation_id',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
@@ -93,7 +94,10 @@ def get_stops_response(event):
             raise InternalException("Failed to find train_uuid", e)
 
     logger.info(f"Got train items: {str(train_items)}")
-    response["stats"] = pandas_fun(df)
+    try:
+        response["stats"] = pandas_fun(df)
+    except Exception as e:
+        raise InternalException("Failed in Pandas", e)
 
     if show_trains:
         response["trains"] = train_items

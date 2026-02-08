@@ -49,8 +49,9 @@ def get_time_between_dict(times_between):
         between_dict["max_time"] = timedelta_to_string(times_between_column.max())
         if between_dict["max_time"] == None:
             logger.info(msg=f"Max Time not found for {column_name}")
-        max_time_index = times_between_column.argmax()
-        between_dict["max_time_uuid"] = times_between.iloc[max_time_index].name
+        else:
+            max_time_index = times_between_column.argmax()
+            between_dict["max_time_uuid"] = times_between.iloc[max_time_index].name
         between_dict["mean_time"] = timedelta_to_string(times_between_column.mean())
         if between_dict["mean_time"] == None:
             logger.info(msg=f"Mean Time not found for {column_name}")

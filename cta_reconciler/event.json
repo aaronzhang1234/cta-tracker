@@ -3,8 +3,9 @@
   "path": "/trains",
   "httpMethod": "GET",
   "headers": {
-    "start_time": "2025-09-11T22:00:00",
-    "end_time": "2025-09-11T23:30:00",
+    "client_correlation_id": "test",
+    "start_time": "2026-01-08T00:30:00.000Z",
+    "end_time": "2026-01-08T04:30:00.000Z",
     "show_trains": false,
     "route": "brn-1"
   }

@@ -67,7 +67,10 @@ def get_stops_response(event):
     if len(items) == 0:
         raise NotFoundException(message="No Trains Exist for Time Period", errors=None)
     logger.info(f"Got {len(items)} from Dynamo DB")
+    logger.info(items[0]["created_timestamp"])
     stop_ids = cta_helper.get_route_order(color_rt).copy()
+    if items[0]["created_timestamp"] > "2026-01-05T00:03:00":
+        stop_ids = cta_helper.get_route_order_no_state(color_rt).copy()
     stop_ids.insert(0, "Created Time")
     response = {"no_of_trains": len(items), "route": color_rt}
     train_items = []
@@ -121,6 +124,12 @@ def convert_to_date_obj(date_str):
     return datetime.datetime.strptime(no_micro, "%Y-%m-%dT%H:%M:%S")
 
 if __name__ == "__main__":
+    class MockContext:
+        function_name = "local_test"
+        memory_limit_in_mb = 128
+        invoked_function_arn = "arn:aws:lambda:us-east-1:123456789:function:local_test"
+        aws_request_id = "local-request-id"
+
     f = open('event.json')
     event_json = json.load(f)
-    print(lambda_handler(event=event_json, context=None))
+    print(lambda_handler(event=event_json, context=MockContext()))
